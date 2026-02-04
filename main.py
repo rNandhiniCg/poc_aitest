@@ -1,33 +1,44 @@
+import os, json
+from diff.diff_analyzer import find_changed_functions
 from ast_analysis.dependency_extractor import extract_dependencies
-from ingestion.build_index import build_index
+from ingestion.build_test_index import build_index
 from retrieval.retriever import retrieve_testcases
 from llm.explainer import explain
-import os, json
  
-# Load all source files
+# Step 1: Find changed functions
+changed_functions = find_changed_functions(
+    "data/source_old",
+    "data/source_new"
+)
+ 
+# Step 2: Find dependencies
 dependencies = {}
-for file in os.listdir("data/source_code"):
+for file in os.listdir("data/source_new"):
     if file.endswith(".py"):
-        with open(f"data/source_code/{file}") as f:
-            deps = extract_dependencies(f.read())
-            dependencies.update(deps)
+        with open(f"data/source_new/{file}") as f:
+            dependencies.update(extract_dependencies(f.read()))
  
-changed_function =  "Product" # "calculateInvoice"   # "applyDiscount"   # 
-impacted_functions = [changed_function] + dependencies.get(changed_function, [])
+impacted_functions = set(changed_functions)
+for fn in changed_functions:
+    impacted_functions.update(dependencies.get(fn, []))
  
+# Step 3: Build test KB
 build_index()
  
-query = f"Testcases related to {impacted_functions}"
-docs = retrieve_testcases(query, impacted_functions)
+# Step 4: Retrieve testcases
+docs = retrieve_testcases(list(impacted_functions))
  
+# Step 5: Explain & store output
 results = []
-for doc in docs:
+for i, doc in enumerate(docs, 1):
     results.append({
+        "seq": i,
         "testcase_id": doc.metadata["testcase_id"],
-        "reason": explain(doc.metadata, impacted_functions)
+        "testcase_name": doc.metadata["testcase_id"],
+        "description": doc.metadata["description"],
+        "impacted_functions": list(impacted_functions),
+        "why_this_testcase": explain(doc.metadata, list(impacted_functions))
     })
  
 with open("output/prioritized_testcases.json", "w") as f:
     json.dump(results, f, indent=2)
-    print("Output got saved in \"output/prioritized_testcases.json\"")
- 

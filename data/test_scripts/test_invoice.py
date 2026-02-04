@@ -1,4 +1,4 @@
-from source_code.invoice_service import calculateInvoice,applyDiscount,calculateTax
+from source_new.invoice_service import calculateInvoice,applyDiscount,calculateTax, new 
 
 def test_TC_01_calculate_invoice():
     """Verify invoice calculation with tax"""
@@ -14,3 +14,7 @@ def test_TC_03_calculate_tax():
     "Verify calculateTax"
     result = calculateTax(400)
     assert result >0
+
+def test_TC_04_pass():
+    new()
+    pass

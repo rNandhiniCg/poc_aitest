@@ -1,13 +1,13 @@
 #dependencies
 
-langchain>=0.1.0    #Core Langchain library
+langchain>=0.2.10    #Core Langchain library
 langchain-community>=0.0.10     #Ollama integration (for running local LLMs)
 
  #To manage environment variables - loads API keys from .env file
 python-dotenv>=1.0.0
 
-langchain-openai>=0.0.5
-openai>=1.0.0
+langchain-openai>=0.1.17
+openai>=1.12.0
 langchain-mistralai>=0.0.5   #Mistral AI API integration
 langchain-groq>=0.1.6     #groq supports other model oss llms
 
@@ -41,7 +41,7 @@ wikipedia==1.4.0
 
 #New poc 
 streamlit
-langchain
+
 langchain-community
 langchain-openai
 
@@ -54,6 +54,7 @@ transformers
 torch
 tiktoken
 python-dotenv
+httpx>=0.25.2
 
 
 

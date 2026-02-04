@@ -6,13 +6,19 @@ def build_index():
     testcases = extract_testcases("data/test_scripts")
     embeddings = get_embeddings()
  
-    texts = [tc["description"] for tc in testcases]
-    metadatas = testcases
+    #texts = [tc["description"] for tc in testcases]
+    #metadatas = testcases
+
+    texts = [
+        f"{tc['testcase_id']} - {tc['description']}"
+        for tc in testcases
+    ]
+ 
  
     vectorstore = FAISS.from_texts(
         texts=texts,
         embedding=embeddings,
-        metadatas=metadatas
+        metadatas= testcases
     )
  
     vectorstore.save_local("faiss_index")

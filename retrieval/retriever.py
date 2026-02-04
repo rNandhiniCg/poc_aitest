@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from ingestion.embeddings import get_embeddings
  
-def retrieve_testcases(query, impacted_functions):
+def retrieve_testcases(impacted_functions):
     embeddings = get_embeddings()
  
     vectorstore = FAISS.load_local(
@@ -9,8 +9,9 @@ def retrieve_testcases(query, impacted_functions):
         embeddings,
         allow_dangerous_deserialization=True
     )
- 
-    docs = vectorstore.similarity_search(query, k=5)
+    
+    query= f"Tests related to functions {impacted_functions}"
+    docs = vectorstore.similarity_search(query, k=10)
  
     return [
         doc for doc in docs

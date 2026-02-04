@@ -1,0 +1,14 @@
+[
+  {
+    "testcase_id": "test_product_init_and_repr",
+    "reason": "This testcase is relevant because it tests the functionality of the 'Product' function, which is listed as an impacted function, despite the lack of a detailed description."
+  },
+  {
+    "testcase_id": "test_product_negative_price",
+    "reason": "The testcase is relevant to validate the functionality, behavior, and edge cases of the 'Product' function since it's identified as an impacted function, despite no detailed description being provided."
+  },
+  {
+    "testcase_id": "test_order_total_amount",
+    "reason": "The testcase is relevant because it tests the functionality of the 'Product' function, ensuring it works correctly despite lacking a detailed description."
+  }
+]

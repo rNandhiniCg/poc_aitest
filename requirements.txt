@@ -1,0 +1,60 @@
+#dependencies
+
+langchain>=0.1.0    #Core Langchain library
+langchain-community>=0.0.10     #Ollama integration (for running local LLMs)
+
+ #To manage environment variables - loads API keys from .env file
+python-dotenv>=1.0.0
+
+langchain-openai>=0.0.5
+openai>=1.0.0
+langchain-mistralai>=0.0.5   #Mistral AI API integration
+langchain-groq>=0.1.6     #groq supports other model oss llms
+
+# Libraries for local LLMs (Hugging face) and embeddings
+transformers>=4.30.0
+accelerate>=0.20.0
+torch>=2.0.0 #for local inference
+
+sentence-transformers>=2.2.2
+
+bitsandbytes>=0.39.0
+gpt4all>=0.3.0
+langchain-ollama>=0.1.0
+chromadb>=0.4.0
+faiss-cpu>=1.7.4
+numpy
+
+pandas>=2.0.0
+aiohttp>=3.8.0
+
+langchainhub>=0.0.3
+
+#Misc 
+#Document Loaders ( Data Ingestion )
+pypdf
+bs4==0.0.2    #beautifulsoup4 - web scrapping 
+unstructured==0.15.0
+arxiv   #Research papers from arxiv.org
+pymupdf
+wikipedia==1.4.0
+
+#New poc 
+streamlit
+langchain
+langchain-community
+langchain-openai
+
+sentence-transformers
+
+faiss-cpu
+chromadb
+transformers
+
+torch
+tiktoken
+python-dotenv
+
+
+
+

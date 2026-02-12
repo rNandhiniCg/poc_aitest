@@ -37,11 +37,11 @@ prompt = st.text_area(
 
 if st.button("Generate"):
    if not prompt:
-       st.warning("Please enter a question", icon="⚠️")
+       st.warning("Please enter a question ..", icon="⚠️")
    else:
        with st.spinner("Thinking..."):
            rag_prompt = f"""
-You are a senior Python engineer.
+You are a senior Python engineer..
  
 Use ONLY information retrieved from the Knowledge Base.
  

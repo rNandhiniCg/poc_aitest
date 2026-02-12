@@ -41,18 +41,85 @@ if st.button("Generate"):
    else:
        with st.spinner("Thinking..."):
            rag_prompt = f"""
-           You are a senior Python engineer.
-Use ONLY the information retrieved from the Knowledge Base.
-Context:
-The knowledge base contains multiple versions of an OSPF Python implementation.
+You are a senior Python engineer.
+ 
+Use ONLY information retrieved from the Knowledge Base.
+ 
 Task:
+Compare the given files and return STRICT structured output.
+ 
+Files:
 {prompt}
+ 
 Instructions:
-- Compare old and new versions of the OSPF code
-- Identify logic differences
-- Highlight added or removed functionality
-- If relevant information is missing, clearly say so
+ 
+1) Generate exact diff between old and new file.
+   Output ONLY in JSON key-value structured format like:
+ 
+{{
+  "keyChanges": {{
+      "added": {{
+          "classes": [],
+          "methods": [],
+          "functionality": []
+      }},
+      "modified": {{
+          "Class.method": {{
+              "added": "",
+              "removed": ""
+          }}
+      }},
+      "removed": {{}}
+  }},
+  "detailedChanges": {{
+      "ClassName": {{
+          "new": true/false,
+          "methods": {{
+              "method_name": "exact change description"
+          }}
+      }},
+      "Class.method": {{
+          "added": [],
+          "removed": []
+      }}
+  }}
+}}
+ 
+Avoid explanations.
+Only structured JSON.
+ 
+2) After diff, generate dependencies ONLY in JSON format:
+ 
+{{
+  "dependencies": {{
+      "Class.method": [],
+      "method_name": []
+  }}
+}}
+ 
+3) After dependencies, find relevant test cases.
+ 
+Rules:
+- Priority 1 → Directly impacted testcases
+- Priority 2 → Dependency impacted testcases
+- If none → return "No relevant testcases available"
+ 
+Return table format:
+ 
+| Test Case ID | Priority | Relevant For | Remarks |
+ 
+Remarks must briefly explain why relevant.
+Do not add extra explanation.
+ 
+If information missing, clearly say:
+"Insufficient data in Knowledge Base"
+ 
+Return output in this order:
+1. Diff JSON
+2. Dependencies JSON
+3. Relevant Test Cases Table
 """
+ 
            
            result = query_with_rag(
                rag_prompt,

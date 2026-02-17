@@ -1,3 +1,5 @@
+#app1.py - streamlit ui + llm kb logic
+
 import streamlit as st
 import requests
 import uuid

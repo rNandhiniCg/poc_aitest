@@ -36,8 +36,8 @@ for qa_pair in qa_pairs:
     with st.expander(qa_pair["question"][:50] + "..."):
         st.write("Question:", qa_pair["question"])
         st.write("Answer:", qa_pair["answer"])
-        st.write("API Key:", qa_pair["api_key"])
-        st.write("KB ID:", qa_pair["kb_id"])
+        #st.write("API Key:", qa_pair["api_key"])
+        #st.write("KB ID:", qa_pair["kb_id"])
         with st.expander("Retrieved Data"):
             st.json(qa_pair["retrieved_data"])
 

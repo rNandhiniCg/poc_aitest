@@ -41,9 +41,10 @@ if st.button("Generate"):
    else:
        with st.spinner("Thinking..."):
            rag_prompt = f"""
-You are a senior Python engineer..
+You are a senior software engineer.
  
 Use ONLY information retrieved from the Knowledge Base.
+Do NOT assume missing content.
  
 Task:
 Compare the given files and return STRICT structured output.
@@ -51,74 +52,121 @@ Compare the given files and return STRICT structured output.
 Files:
 {prompt}
  
-Instructions:
+----------------------------------------
+LANGUAGE-AWARE ANALYSIS
+----------------------------------------
  
+The files may be written in:
+- Python (.py)
+- C (.c, .h)
+- C++ (.cpp, .hpp)
+- Java (.java)
+ 
+Detect language automatically based on file extension and apply appropriate rules.
+ 
+----------------------------------------
 1) Generate exact diff between old and new file.
-   Output ONLY in JSON key-value structured format like:
+Output ONLY in JSON format:
  
 {{
+  "fileType": "python | c | cpp | java",
   "keyChanges": {{
-      "added": {{
-          "classes": [],
-          "methods": [],
-          "functionality": []
-      }},
-      "modified": {{
-          "Class.method": {{
-              "added": "",
-              "removed": ""
-          }}
-      }},
-      "removed": {{}}
+    "added": {{
+      "classes": [],
+      "functions": [],
+      "methods": [],
+      "structs": [],
+      "macros": [],
+      "imports": [],
+      "functionality": []
+    }},
+    "modified": {{
+      "entity_name": {{
+        "added": "",
+        "removed": ""
+      }}
+    }},
+    "removed": {{
+      "classes": [],
+      "functions": [],
+      "methods": [],
+      "structs": [],
+      "macros": []
+    }}
   }},
   "detailedChanges": {{
-      "ClassName": {{
-          "new": true/false,
-          "methods": {{
-              "method_name": "exact change description"
-          }}
-      }},
-      "Class.method": {{
-          "added": [],
-          "removed": []
-      }}
+    "entity_name": {{
+      "type": "class | function | method | struct | macro",
+      "change": "exact structural change summary"
+    }}
   }}
 }}
  
-Avoid explanations.
-Only structured JSON.
+Rules:
+- For C/C++ → focus on functions, structs, macros, headers.
+- For Java → focus on classes, methods, imports.
+- For Python → focus on classes, methods, functions, imports.
+- If incomplete file content → return:
+  "Insufficient data in Knowledge Base"
  
-2) After diff, generate dependencies ONLY in JSON format:
+No explanations outside JSON.
+ 
+----------------------------------------
+2) Generate dependencies ONLY in JSON:
  
 {{
   "dependencies": {{
-      "Class.method": [],
-      "method_name": []
+    "functions_called": [],
+    "struct_usage": [],
+    "class_usage": [],
+    "header_includes": [],
+    "imports": []
   }}
 }}
  
-3) After dependencies, find relevant test cases.
- 
 Rules:
-- Priority 1 → Directly impacted testcases
-- Priority 2 → Dependency impacted testcases
-- If none → return "No relevant testcases available"
+- For C/C++ → include #include headers and called functions.
+- For Java → include imported classes and method calls.
+- For Python → include imports and function/class usage.
+- Do NOT guess dependencies.
  
-Return table format:
+----------------------------------------
+3) Find relevant test cases.
+ 
+Testcase Search Rules:
+ 
+- If specific test scripts are mentioned in retrieved context,
+  search ONLY in those test files.
+ 
+- If not mentioned,
+  search across ALL available test scripts.
+ 
+- If no testcases found, return EXACT:
+  "No appropriate Testcases found"
+ 
+Priority:
+- Priority 1 → Directly impacted
+- Priority 2 → Dependency impacted
+ 
+Return STRICT table:
  
 | Test Case ID | Priority | Relevant For | Remarks |
  
-Remarks must briefly explain why relevant.
-Do not add extra explanation.
+No extra explanation.
  
-If information missing, clearly say:
-"Insufficient data in Knowledge Base"
- 
-Return output in this order:
+----------------------------------------
+Return output in this order ONLY:
 1. Diff JSON
 2. Dependencies JSON
-3. Relevant Test Cases Table
+3. Relevant Test Cases Table OR exact message
+----------------------------------------
+ 
+STRICT MODE:
+No markdown explanation.
+No summary.
+Only structured output.
 """
+ 
  
            
            result = query_with_rag(

@@ -55,6 +55,7 @@ torch
 tiktoken
 python-dotenv
 httpx>=0.25.2
+dotenv
 
 
 

@@ -39,4 +39,5 @@ def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
        }
    }
    response = requests.post(url, headers=headers, json=payload)
+   
    return response.json()

@@ -38,24 +38,35 @@ def parse_response(response):
     
     return diff_json, dependencies_json, test_cases
 
-st.set_page_config(page_title="RAG LLM Demo")
-st.title("RAG LLM Q&A")
+st.set_page_config(page_title="AI-RAG LLM Q&A")
+st.title("AI-Based Testcase Prioritzation")
 
 if st.sidebar.button("History"):
     st.switch_page("pages/history.py")
 
-prompt = st.text_area(
-   "Ask your question",
-   height=120,
-   placeholder="Type your question here..."
-)
+st.write(f"Model :  {MODEL_NAME}")
+
+old_files = st.text_area("Enter old source code file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
+new_files = st.text_area("Enter new source code file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
+test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
+
 
 if st.button("Prioritize TestCases"):
-    if not prompt:
-        st.warning("Please enter a question ..", icon="⚠️")
+    if not old_files or not new_files:
+        st.warning("Please enter both old and new source code file names.", icon="⚠️")
     else:
         with st.spinner("Thinking..."):
-           rag_prompt = f"""
+
+          prompt= f"""
+          Old files: {old_files}
+          New files: {new_files}
+          Test scripts: {test_scripts}
+
+Compare the given files and prioritize test cases based on the changes.
+
+"""
+        
+          rag_prompt = f"""
 You are a senior software engineer.
  
 Use ONLY information retrieved from the Knowledge Base.
@@ -204,7 +215,7 @@ Only structured output.
                 diff_json, dependencies_json, test_cases = parse_response(answer)
                
                 st.success("Response", icon="✅")
-                st.write("Test Cases:")
+                st.markdown("### Prioritized TestCases")
                 if "| Test Case ID |" in test_cases:
                     st.markdown(test_cases)
                 else:

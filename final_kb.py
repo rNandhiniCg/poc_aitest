@@ -6,9 +6,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-GEP_API_KEY= os.getenv("GEP_API_KEY")
+GEP_API_KEY= os.getenv("GEP_API_KEY1")
 
-kb_id= os.getenv("kb_id")
+kb_id= os.getenv("kb_id3")
  
 def query_with_rag(api_key, workspace_id, prompt, model_name):
     url = "https://api.generative.engine.capgemini.com/v2/llm/invoke"
@@ -54,6 +54,6 @@ prompt = input("Ask your question: ")
 print("Generating response ...")
 
 result = query_with_rag(api_key, workspace_id, prompt, model_name)
-#print(json.dumps(result, indent=2))
+print(json.dumps(result, indent=2))
 print(result["content"])
 

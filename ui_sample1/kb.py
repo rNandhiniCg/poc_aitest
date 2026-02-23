@@ -6,7 +6,7 @@ load_dotenv()
 
 API_KEY = os.getenv("api_key")
 WORKSPACE_ID =os.getenv( "kb_id")
-MODEL_NAME = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+MODEL_NAME = "us.anthropic.claude-3-7-sonnet-20250219-v2:0"
 
 def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
    url = "https://api.generative.engine.capgemini.com/v2/llm/invoke"
@@ -28,16 +28,16 @@ def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
            "workspaceId": WORKSPACE_ID,
            "modelKwargs": {
                "maxTokens": 1024,
-               "temperature": 0.6,
+               "temperature": 0.5,
                "streaming": False,
-               "topP": 0.9
+               "topP": 0.3
            },
            "ragKwargs": {
                "docLimit": 10,
-               #"knowledgeBaseIds":[WORKSPACE_ID]
+               
            }
        }
    }
    response = requests.post(url, headers=headers, json=payload)
-   
+   print(response)
    return response.json()

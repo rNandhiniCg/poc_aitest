@@ -25,7 +25,7 @@ def store_qa_pair(api_key, kb_id, question, answer, retrieved_data):
 st.set_page_config(page_title="RAG LLM Demo")
 st.title("RAG LLM Q&A")
 
-# Add a History button to the sidebar in ui
+# Add a History button to the sidebar
 if st.sidebar.button("History"):
     st.switch_page("pages/history.py")
 

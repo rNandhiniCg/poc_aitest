@@ -1,3 +1,6 @@
+#app1.py - old ui , display diff json, dependencies json , Testcase table with no.priority
+#rag_prompt - for all filetypes
+
 import streamlit as st
 from kb import query_with_rag
 import os

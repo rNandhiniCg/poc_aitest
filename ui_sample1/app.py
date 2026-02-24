@@ -1,8 +1,10 @@
+
 import streamlit as st
 from kb import query_with_rag
 import os
 from dotenv import load_dotenv
 import sqlite3
+import re
 import json
 
 load_dotenv()
@@ -22,25 +24,49 @@ def store_qa_pair(api_key, kb_id, question, answer, retrieved_data):
     conn.commit()
     conn.close()
 
-st.set_page_config(page_title="RAG LLM Demo")
-st.title("RAG LLM Q&A")
+def parse_response(response):
+    parts = response.split('```json')
+    diff_json = json.loads(parts[1].split('```')[0]) if len(parts) > 1 else None
+    dependencies_json = json.loads(parts[2].split('```')[0]) if len(parts) > 2 else None
+    
+    # Look for the test case table
+    test_cases = "No appropriate Testcases found"
+    if "| Test Case ID | Priority | Relevant For | Remarks |" in response:
+        table_start = response.index("| Test Case ID | Priority | Relevant For | Remarks |")
+        table_end = response.find("\n\n", table_start)
+        test_cases = response[table_start:table_end].strip()
+    
+    return diff_json, dependencies_json, test_cases
 
-# Add a History button to the sidebar
+st.set_page_config(page_title="AI-RAG LLM Q&A")
+st.title("AI-Based Testcase Prioritzation")
+
 if st.sidebar.button("History"):
     st.switch_page("pages/history.py")
 
-prompt = st.text_area(
-   "Ask your question",
-   height=120,
-   placeholder="Type your question here..."
-)
+st.write(f"Model :  {MODEL_NAME}")
 
-if st.button("Generate"):
-   if not prompt:
-       st.warning("Please enter a question ..", icon="⚠️")
-   else:
-       with st.spinner("Thinking..."):
-           rag_prompt = f"""
+old_files = st.text_area("Enter old source code file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
+new_files = st.text_area("Enter new source code file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
+test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
+
+
+if st.button("Prioritize TestCases"):
+    if not old_files or not new_files:
+        st.warning("Please enter both old and new source code file names.", icon="⚠️")
+    else:
+        with st.spinner("Thinking..."):
+
+          prompt= f"""
+          Old files: {old_files}
+          New files: {new_files}
+          Test scripts: {test_scripts}
+
+Compare the given files and prioritize test cases based on the changes.
+
+"""
+        
+          rag_prompt = f"""
 You are a senior software engineer.
  
 Use ONLY information retrieved from the Knowledge Base.
@@ -167,34 +193,44 @@ No summary.
 Only structured output.
 """
  
- 
-           
-           result = query_with_rag(
+        result = query_with_rag(
                rag_prompt,
                API_KEY,
                WORKSPACE_ID,
                MODEL_NAME
-           )
+        )
            
-           if "content" in result:
-               answer = result["content"]
-               retrieved_data = result.get("retrieved_documents", [])
+        if "content" in result:
+                answer = result["content"]
+                retrieved_data = result.get("retrieved_documents", [])
                
-               st.session_state.last_qa_pair = {
+                st.session_state.last_qa_pair = {
                    "api_key": API_KEY,
                    "kb_id": WORKSPACE_ID,
                    "question": prompt,
                    "answer": answer,
                    "retrieved_data": retrieved_data
-               }
+                }
                
-               st.success("Response", icon="✅")
-               st.write(answer)
-           else:
+                diff_json, dependencies_json, test_cases = parse_response(answer)
+               
+                st.success("Response", icon="✅")
+                st.markdown("### Prioritized TestCases")
+                if "| Test Case ID |" in test_cases:
+                    st.markdown(test_cases)
+                else:
+                    st.write(test_cases)
+               
+                with st.expander("Explain Testcase Selection"):
+                   st.subheader("Diff JSON")
+                   st.json(diff_json)
+                   st.subheader("Dependencies JSON")
+                   st.json(dependencies_json)
+        else:
                st.error("Unexpected response", icon="🚨")
                st.json(result)
 
-if st.button("Store Last Q&A Pair"):
+if st.button("Save to History"):
     if hasattr(st.session_state, 'last_qa_pair'):
         qa_pair = st.session_state.last_qa_pair
         store_qa_pair(qa_pair["api_key"], qa_pair["kb_id"], qa_pair["question"], qa_pair["answer"], qa_pair["retrieved_data"])

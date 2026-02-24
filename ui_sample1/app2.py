@@ -1,3 +1,5 @@
+#app2.py - ui update add hide json expander , display only TC table
+#rag_prompt - for all filetypes
 
 import streamlit as st
 from kb import query_with_rag
@@ -44,23 +46,23 @@ st.title("AI-Based Testcase Prioritzation")
 if st.sidebar.button("History"):
     st.switch_page("pages/history.py")
 
-st.write(f"Model :  {MODEL_NAME}")
+#st.write(f"Model :  {MODEL_NAME}")
 
-old_files = st.text_area("Enter old source code file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
-new_files = st.text_area("Enter new source code file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
-test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
+#old_files = st.text_area("Enter old source file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
+new_files = st.text_area("Enter modified source file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
+#test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
 
 
 if st.button("Prioritize TestCases"):
-    if not old_files or not new_files:
-        st.warning("Please enter both old and new source code file names.", icon="⚠️")
+    if not new_files:
+        st.warning("Please enter source code file name(s).", icon="⚠️")
     else:
         with st.spinner("Thinking..."):
 
           prompt= f"""
-          Old files: {old_files}
+          
           New files: {new_files}
-          Test scripts: {test_scripts}
+         
 
 Compare the given files and prioritize test cases based on the changes.
 

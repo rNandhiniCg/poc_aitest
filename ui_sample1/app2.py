@@ -1,10 +1,10 @@
 #app2.py - ui update add hide json expander , display only TC table
 #rag_prompt - for all filetypes
 
-import streamlit as st
+import streamlit as st # type: ignore
 from kb import query_with_rag
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 import sqlite3
 import re
 import json

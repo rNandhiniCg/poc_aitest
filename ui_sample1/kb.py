@@ -9,12 +9,12 @@ WORKSPACE_ID =os.getenv( "kb_id")
 MODEL_NAME = "us.anthropic.claude-3-7-sonnet-20250219-v2:0"
 
 def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
-   url = "https://api.generative.engine.capgemini.com/v2/llm/invoke"
-   headers = {
+    url = "https://api.generative.engine.capgemini.com/v2/llm/invoke"
+    headers = {
        "x-api-key": API_KEY,
        "Content-Type": "application/json"
-   }
-   payload = {
+    }
+    payload = {
        "action": "run",
        "modelInterface": "multimodal",
        "adapterInterfaceVersion": "v2",
@@ -37,7 +37,11 @@ def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
                
            }
        }
-   }
-   response = requests.post(url, headers=headers, json=payload)
-   print(response)
-   return response.json()
+    }
+    response = requests.post(url, headers=headers, json=payload)
+    print(response)
+    return response.json()
+    
+    
+
+    

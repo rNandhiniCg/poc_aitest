@@ -1,8 +1,10 @@
+#app3.py - same as app2.py
+#rag_prompt - for all filetypes, Sh prompt
 
-import streamlit as st  # type: ignore
+import streamlit as st # type: ignore
 from kb import query_with_rag
 import os
-from dotenv import load_dotenv    # type: ignore
+from dotenv import load_dotenv  # type: ignore
 import sqlite3
 import re
 import json
@@ -44,153 +46,93 @@ st.title("AI-Based Testcase Prioritzation")
 if st.sidebar.button("History"):
     st.switch_page("pages/history.py")
 
-st.write(f"Model :  {MODEL_NAME}")
+#st.write(f"Model :  {MODEL_NAME}")
 
-old_files = st.text_area("Enter old source code file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
-new_files = st.text_area("Enter new source code file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
-test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
+#old_files = st.text_area("Enter old source file name(s)", height=20, placeholder="Enter file name(s) separated by commas...")
+new_files = st.text_area("Enter modified source file name(s)", height=60, placeholder="Enter file name(s) separated by commas...")
+#test_scripts = st.text_area("Enter test script file name(s) (optional)", height=60, placeholder="Enter file name(s) separated by commas...")
 
 
 if st.button("Prioritize TestCases"):
-    if not old_files or not new_files:
-        st.warning("Please enter both old and new source code file names.", icon="⚠️")
+    if not new_files:
+        st.warning("Please enter source code file name(s).", icon="⚠️")
     else:
         with st.spinner("Thinking..."):
 
           prompt= f"""
-          Old files: {old_files}
+          
           New files: {new_files}
-          Test scripts: {test_scripts}
+         
 
 Compare the given files and prioritize test cases based on the changes.
 
 """
         
           rag_prompt = f"""
-You are a senior software engineer.
- 
 Use ONLY information retrieved from the Knowledge Base.
-Do NOT assume missing content.
- 
 Task:
-Compare the given files and return STRICT structured output.
+ 1.The user will provide an updated filename. Your task is to automatically find
+the correct original file from the Knowledge Base.
+ 
+Rules to match files:
+a. Normalize the user filename:
+   - Remove words like "copy", "new", "final", "updated", "(1)", version numbers, etc.
+   - Remove extra symbols and noisy suffixes.
+   - Extract the core filename without extension.
+ 
+b. Find the closest matching file in the Knowledge Base:
+   Priority:
+   a) Exact base name match (highest priority)
+   b) Prefix match (e.g., "ospf6_neighbor" matches "ospf6_neighbor.c")
+   c) Highest similarity score between filenames
+   d) If still multiple matches → choose the shortest filename (likely the real module file)
+ 
+Compare the given files to knowledge Base Files and return STRICT structured output.
  
 Files:
 {prompt}
  
-----------------------------------------
-LANGUAGE-AWARE ANALYSIS
-----------------------------------------
- 
-The files may be written in:
-- Python (.py)
-- C (.c, .h)
-- C++ (.cpp, .hpp)
-- Java (.java)
- 
-Detect language automatically based on file extension and apply appropriate rules.
- 
-----------------------------------------
+Instructions:
 1) Generate exact diff between old and new file.
-Output ONLY in JSON format:
- 
-{{
-  "fileType": "python | c | cpp | java",
-  "keyChanges": {{
-    "added": {{
-      "classes": [],
-      "functions": [],
-      "methods": [],
-      "structs": [],
-      "macros": [],
-      "imports": [],
-      "functionality": []
-    }},
-    "modified": {{
-      "entity_name": {{
-        "added": "",
-        "removed": ""
-      }}
-    }},
-    "removed": {{
-      "classes": [],
-      "functions": [],
-      "methods": [],
-      "structs": [],
-      "macros": []
-    }}
-  }},
-  "detailedChanges": {{
-    "entity_name": {{
-      "type": "class | function | method | struct | macro",
-      "change": "exact structural change summary"
-    }}
+   Output ONLY in JSON key-value structured format.
+   Rules:
+   output format(STRICT):
+   {{
+  "added_functions": [],
+  "modified_functions": [],
+  "deleted_functions": [],
+  "changes": {{
+    ""
   }}
 }}
  
-Rules:
-- For C/C++ → focus on functions, structs, macros, headers.
-- For Java → focus on classes, methods, imports.
-- For Python → focus on classes, methods, functions, imports.
-- If incomplete file content → return:
-  "Insufficient data in Knowledge Base"
- 
-No explanations outside JSON.
- 
-----------------------------------------
-2) Generate dependencies ONLY in JSON:
- 
-{{
-  "dependencies": {{
-    "functions_called": [],
-    "struct_usage": [],
-    "class_usage": [],
-    "header_includes": [],
-    "imports": []
+2) After diff, generate dependencies ONLY in JSON.
+ Rules:
+ Output Format (STRICT):
+[
+  {{
+    "Function": "",
+    "Internal_calls": [],
+    "Testcase_id_internal": "",
+    "External_calls": [],
+    "Testcase_id_external": "",
+    "Testcase_files": []
   }}
-}}
+ 
+3) After dependencies, find relevant test cases in table format:
+ 
+Test Case ID | Priority | Relevant For | Remarks
  
 Rules:
-- For C/C++ → include #include headers and called functions.
-- For Java → include imported classes and method calls.
-- For Python → include imports and function/class usage.
-- Do NOT guess dependencies.
+High Priority: The function is newly added.
+Medium Priority: The function internally calls another function defined in the same file.
+Low Priority: The function calls a function from an external file or module.
+- If none → return "No relevant testcases available"
  
-----------------------------------------
-3) Find relevant test cases.
- 
-Testcase Search Rules:
- 
-- If specific test scripts are mentioned in retrieved context,
-  search ONLY in those test files.
- 
-- If not mentioned,
-  search across ALL available test scripts.
- 
-- If no testcases found, return EXACT:
-  "No appropriate Testcases found"
- 
-Priority:
-- Priority 1 → Directly impacted
-- Priority 2 → Dependency impacted
- 
-Return STRICT table:
- 
-| Test Case ID | Priority | Relevant For | Remarks |
- 
-No extra explanation.
- 
-----------------------------------------
-Return output in this order ONLY:
+Return output in this exact order:
 1. Diff JSON
 2. Dependencies JSON
-3. Relevant Test Cases Table OR exact message
-----------------------------------------
- 
-STRICT MODE:
-No markdown explanation.
-No summary.
-Only structured output.
+3. Relevant Test Cases Table
 """
  
         result = query_with_rag(

@@ -11,6 +11,8 @@ import json
 
 load_dotenv()
 
+
+
 API_KEY = os.getenv("GEP_API_KEY")
 WORKSPACE_ID = os.getenv("kb_id")
 MODEL_NAME = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
@@ -145,13 +147,26 @@ Return output in this exact order:
         if "content" in result:
                 answer = result["content"]
                 retrieved_data = result.get("retrieved_documents", [])
-               
+
+                input_tokens = result.get("input_tokens", 0)
+                output_tokens = result.get("output_tokens", 0)
+                api_calls = result.get("api_calls", 0)
+                
+                # Update total API calls
+                global total_api_calls
+                # Add a global variable to track total API calls
+                total_api_calls = 0
+                total_api_calls += api_calls
+
                 st.session_state.last_qa_pair = {
                    "api_key": API_KEY,
                    "kb_id": WORKSPACE_ID,
                    "question": prompt,
                    "answer": answer,
-                   "retrieved_data": retrieved_data
+                   "retrieved_data": retrieved_data,
+                   "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                    "api_calls": api_calls
                 }
                
                 diff_json, dependencies_json, test_cases = parse_response(answer)
@@ -164,10 +179,18 @@ Return output in this exact order:
                     st.write(test_cases)
                
                 with st.expander("Explain Testcase Selection"):
-                   st.subheader("Diff JSON")
-                   st.json(diff_json)
-                   st.subheader("Dependencies JSON")
-                   st.json(dependencies_json)
+                    st.subheader("Diff JSON")
+                    st.json(diff_json)
+                    st.subheader("Dependencies JSON")
+                    st.json(dependencies_json)
+
+                    # Display API call and token information
+                    st.subheader("API Usage Information")
+                    st.write(f"API Calls: {api_calls}")
+                    st.write(f"Total API Calls: {total_api_calls}")
+                    st.write(f"Input Tokens: {input_tokens}")
+                    st.write(f"Output Tokens: {output_tokens}")
+                    st.write(f"Total Tokens: {input_tokens + output_tokens}")
         else:
                st.error("Unexpected response", icon="🚨")
                st.json(result)

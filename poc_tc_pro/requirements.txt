@@ -1,0 +1,8 @@
+ #To manage environment variables - loads API keys from .env file
+python-dotenv>=1.0.0
+
+streamlit
+python-dotenv
+dotenv
+
+tinydb

@@ -1,7 +1,7 @@
-import requests
+import requests  # type: ignore
 import uuid
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 load_dotenv()
 
 API_KEY = os.getenv("api_key")
@@ -41,6 +41,9 @@ def query_with_rag(prompt,API_KEY,WORKSPACE_ID,MODEL_NAME):
     response = requests.post(url, headers=headers, json=payload)
     print(response)
     return response.json()
+    
+    
+    
     
     
 

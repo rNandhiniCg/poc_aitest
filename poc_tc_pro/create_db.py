@@ -1,3 +1,5 @@
+#for creating local file-based db table 
+
 import sqlite3
 
 DB_FILE = "qa_history.db"
